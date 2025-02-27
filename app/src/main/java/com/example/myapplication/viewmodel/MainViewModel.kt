@@ -1,74 +1,82 @@
+package com.example.myapplication.viewmodel
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.model.PictureBean
 import com.example.myapplication.model.WeatherRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.delay
-import com.example.myapplication.model.PictureBean
 
-// ViewModel
-class MainViewModel : ViewModel() {
-    // MutableStateFlow pour stocker la liste de PictureBean
-    val dataList = MutableStateFlow(emptyList<PictureBean>())
-    val runInProgress = MutableStateFlow(false) // Indicateur de chargement
-    val errorMessage = MutableStateFlow<String?>(null) // Message d'erreur
-
-    fun loadWeathers(cityName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            runInProgress.value = true
-            errorMessage.value = null // Réinitialiser le message d'erreur
-
-            try {
-                val weathers = WeatherRepository.loadWeathers(cityName)
-
-                if (weathers != null && weathers.isNotEmpty()) {
-                    // Transformation des données en PictureBean
-                    dataList.value = weathers.map { weather ->
-                        PictureBean(
-                            id = weather.id,
-                            url = weather.weather.firstOrNull()?.icon ?: "",
-                            title = weather.name,
-                            longText = "Il fait ${weather.main.temp}° à ${weather.name}."
-                        )
-                    }
-                } else {
-                    errorMessage.value = "Aucune donnée météo disponible pour la ville $cityName."
-                    dataList.value = emptyList() // Réinitialiser la liste des données
-                }
-            } catch (e: Exception) {
-                errorMessage.value = "Erreur lors de la récupération des données : ${e.message}"
-                dataList.value = emptyList() // Réinitialiser la liste des données en cas d'erreur
-            } finally {
-                runInProgress.value = false
-            }
-        }
-    }
-}
-
-// Main fonction pour tester le ViewModel
 fun main() {
     val viewModel = MainViewModel()
+    viewModel.loadWeathers("")
 
-    // Tester le main de MainViewModel
-    runBlocking {
-        // Lancer la récupération des données pour Toulouse
-        viewModel.loadWeathers("Toulouse")
+    while (viewModel.runInProgress.value) {
+        println("Attente...")
+        Thread.sleep(500)
+    }
 
-        // Attendre que les données soient chargées
-        while (viewModel.runInProgress.value) {
-            delay(500) // Attente avec une pause de 500ms pour ne pas bloquer le thread
+    //Affichage de la liste (qui doit être remplie) contenue dans la donnée observable
+    println("List : ${viewModel.dataList.value}")
+    println("ErrorMessage : ${viewModel.errorMessage.value}")
+}
+
+const val LONG_TEXT = """Le Lorem Ipsum est simplement du faux texte employé dans la composition
+    et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard
+    de l'imprimerie depuis les années 1500"""
+
+open class MainViewModel : ViewModel() {
+    //MutableStateFlow est une donnée observable
+    val dataList = MutableStateFlow(emptyList<PictureBean>())
+    val runInProgress = MutableStateFlow(false)
+    val errorMessage = MutableStateFlow("")
+
+    fun loadWeathers(cityName: String) {
+
+        runInProgress.value = true
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val weatherlist = WeatherRepository.loadWeathers(cityName)
+                dataList.value = weatherlist.map { city ->
+                    PictureBean(
+                        id = city.id.toInt(),
+                        url = city.weather.firstOrNull()?.icon ?: "",
+                        title = city.name,
+                        longText = """
+           Il fait ${city.main.temp}° à ${city.name} (id=${city.id}) avec un vent de ${city.wind.speed} m/s
+           -Description : ${city.weather.getOrNull(0)?.description ?: "-"}
+           -Icône : ${city.weather.getOrNull(0)?.icon ?: "-"}
+       """.trimIndent()
+                    )
+                }
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+                errorMessage.value = e.message ?: "Une erreur est survenue"
+            }
+
+            runInProgress.value = false
         }
 
-        // Afficher les données ou message d'erreur
-        if (viewModel.errorMessage.value != null) {
-            println("Erreur : ${viewModel.errorMessage.value}")
-        } else if (viewModel.dataList.value.isNotEmpty()) {
-            val firstWeather = viewModel.dataList.value[0]
-            println("Il fait ${firstWeather.longText}")
-        } else {
-            println("Aucune donnée météo disponible.")
-        }
+
+        println("fin")
+
+
+    }
+
+    init {//Création d'un jeu de donnée au démarrage
+        loadFakeData()
+    }
+
+    fun loadFakeData(runInProgress :Boolean = false, errorMessage:String = "" ) {
+        this.runInProgress.value = runInProgress
+        this.errorMessage.value = errorMessage
+        dataList.value = listOf(PictureBean(1, "https://picsum.photos/200", "ABCD", LONG_TEXT),
+            PictureBean(2, "https://picsum.photos/201", "BCDE", LONG_TEXT),
+            PictureBean(3, "https://picsum.photos/202", "CDEF", LONG_TEXT),
+            PictureBean(4, "https://picsum.photos/203", "EFGH", LONG_TEXT)
+        ).shuffled() //shuffled() pour avoir un ordre différent à chaque appel
     }
 }

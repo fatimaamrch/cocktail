@@ -1,5 +1,6 @@
 [versions]
 agp = "8.8.0"
+compose = "1.0.0-beta01"
 gson = "2.10.1"
 kotlin = "2.0.0"
 coreKtx = "1.10.1"
@@ -14,6 +15,8 @@ okhttp = "5.0.0-alpha.14"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose" }
+compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

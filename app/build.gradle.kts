@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.okhttp)
     implementation(libs.gson)
