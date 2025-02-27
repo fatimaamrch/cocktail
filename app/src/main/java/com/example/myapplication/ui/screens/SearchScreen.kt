@@ -2,6 +2,7 @@ package com.example.myapplication.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,20 +46,27 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.viewmodel.MainViewModel
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = MainViewModel()) {
+fun SearchScreen(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel = MainViewModel()
+) {
     var searchText by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
             .background(Color.LightGray)
             .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally // Pour centrer horizontalement les éléments
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         println("SearchScreen()")
+
         TextField(
-            value = searchText, // Valeur affichée
-            onValueChange = { newValue -> searchText = newValue }, // Nouveau texte entré
-            leadingIcon = { // Image d'icône
+            value = searchText,
+            onValueChange = { newValue ->
+                searchText = newValue
+                mainViewModel.search(newValue) // Ne recharge pas les données, filtre seulement
+            },
+            leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     tint = MaterialTheme.colorScheme.primary,
@@ -66,21 +74,17 @@ fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = M
                 )
             },
             singleLine = true,
-            label = { // Texte d'aide qui se déplace
-                Text("Votre recherche ici")
-            },
-            //placeholder = { // Texte d'aide qui disparaît
-            //Text("Recherche")
-            //},
+            label = { Text("Votre recherche ici") },
             modifier = Modifier
-                .fillMaxWidth() // Prendre toute la largeur
-                .heightIn(min = 56.dp) // Hauteur minimum
-                .padding(8.dp) // Ajouter un peu d'espace autour du champ de texte
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(8.dp)
         )
+
         Spacer(Modifier.size(8.dp))
 
-        // Observation
-        val list = mainViewModel.dataList.collectAsStateWithLifecycle().value
+        // Observation de la liste filtrée
+        val list = mainViewModel.filteredDataList.collectAsStateWithLifecycle().value
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(list) { item ->
@@ -90,14 +94,15 @@ fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = M
 
         Spacer(modifier = Modifier.weight(1f)) // Pousse les boutons vers le bas
 
-        // Row pour les boutons
         Row(
-            modifier = Modifier
-                .padding(10.dp),
+            modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
-                onClick = { /* Action pour Clear filter */ },
+                onClick = {
+                    searchText = ""
+                    mainViewModel.clearFilter()
+                },
                 modifier = Modifier.weight(1f).padding(end = 8.dp)
             ) {
                 Icon(
@@ -105,12 +110,12 @@ fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = M
                     tint = MaterialTheme.colorScheme.surface,
                     contentDescription = null
                 )
-                Spacer(modifier = Modifier.size(4.dp)) // Espace entre l'icône et le texte
+                Spacer(modifier = Modifier.size(4.dp))
                 Text("Clear filter")
             }
 
             Button(
-                onClick = { /* Action pour Load data */ },
+                onClick = { mainViewModel.clearFilter() },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
@@ -118,21 +123,25 @@ fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = M
                     tint = MaterialTheme.colorScheme.surface,
                     contentDescription = null
                 )
-                Spacer(modifier = Modifier.size(4.dp)) // Espace entre l'icône et le texte
+                Spacer(modifier = Modifier.size(4.dp))
                 Text("Load data")
             }
         }
     }
 }
 
-        @OptIn(ExperimentalGlideComposeApi::class)
+
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
+    var expanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp)
             .background(MaterialTheme.colorScheme.surface)
+            .clickable { expanded = !expanded } // Toggle l'état d'affichage complet
     ) {
         // Affichage de l'image avec Glide
         GlideImage(
@@ -148,17 +157,17 @@ fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
 
         // Affichage du titre et de la description
         Column {
-            Text(text = data.title, fontSize = 16.sp, color = Color.Black)
+            Text(text = data.title, style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = data.longText,
+                text = if (expanded) data.longText else data.longText.take(20) + "...",
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 2
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Preview(showBackground = true, showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
