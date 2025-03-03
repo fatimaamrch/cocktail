@@ -2,15 +2,15 @@ package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.model.CocktailBean
 import com.example.myapplication.model.CocktailRepository
+import com.example.myapplication.model.PictureBean
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 fun main() {
     val viewModel = MainViewModel()
-    viewModel.loadCocktails()
+    viewModel.loadCocktails("")
 
     while (viewModel.runInProgress.value) {
         println("Attente...")
@@ -28,15 +28,15 @@ const val LONG_TEXT = """Le Lorem Ipsum est simplement du faux texte employé da
 
 open class MainViewModel : ViewModel() {
     // MutableStateFlow est une donnée observable
-    val dataList = MutableStateFlow(emptyList<CocktailBean>())
+    val dataList = MutableStateFlow(emptyList<PictureBean>())
     val runInProgress = MutableStateFlow(false)
     val errorMessage = MutableStateFlow("")
 
     init {
-        loadCocktails()
+        loadCocktails("")
     }
 
-    fun loadCocktails() {
+    fun loadCocktails(cocktailName: String) {
         runInProgress.value = true
         errorMessage.value = ""
 
@@ -46,7 +46,7 @@ open class MainViewModel : ViewModel() {
                 val cocktailsList = CocktailRepository.loadCocktails()
                 // Mise à jour de la donnée observable avec les résultats
                 dataList.value = cocktailsList.map { cocktail ->
-                    CocktailBean(
+                    PictureBean(
                         id = cocktail.id,
                         title = cocktail.title,
                         difficulty = cocktail.difficulty,
@@ -68,10 +68,10 @@ open class MainViewModel : ViewModel() {
         this.runInProgress.value = runInProgress
         this.errorMessage.value = errorMessage
         dataList.value = listOf(
-            CocktailBean("1", "Cocktail 1", "Facile", "https://picsum.photos/200"),
-            CocktailBean("2", "Cocktail 2", "Moyenne", "https://picsum.photos/201"),
-            CocktailBean("3", "Cocktail 3", "Difficile", "https://picsum.photos/202"),
-            CocktailBean("4", "Cocktail 4", "Facile", "https://picsum.photos/203")
+            PictureBean(1, "Cocktail 1", "Facile", "https://picsum.photos/200"),
+            PictureBean(2, "Cocktail 2", "Moyenne", "https://picsum.photos/201"),
+            PictureBean(3, "Cocktail 3", "Difficile", "https://picsum.photos/202"),
+            PictureBean(4, "Cocktail 4", "Facile", "https://picsum.photos/203")
         ).shuffled() // shuffled() pour avoir un ordre différent à chaque appel
     }
 }

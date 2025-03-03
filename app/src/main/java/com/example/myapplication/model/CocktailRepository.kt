@@ -4,13 +4,13 @@ import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-data class CocktailBean(val id: String, val title: String, val difficulty: String, val image: String)
+data class CocktailBean(val id: Int, val title: String, val difficulty: String, val image: String)
 
 object CocktailRepository {
     private val client = OkHttpClient()
     private val gson = Gson()
     private const val API_URL = "https://the-cocktail-db3.p.rapidapi.com/"  // URL de base
-    private const val API_KEY = "8f4ddb5b81mshdd52639e1bcc6f5p18e117jsn286fbf9ca1ef"  // Votre clé d'API
+    private const val API_KEY = "3f58d16fb6msh55e470dc672331ep174154jsn7d4b3926a3c9"  // Votre clé d'API
 
     fun loadCocktails(): List<CocktailBean> {
         val json: String = sendGet(API_URL)
