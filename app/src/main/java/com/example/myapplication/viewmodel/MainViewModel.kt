@@ -43,7 +43,7 @@ open class MainViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 // Appel de la méthode loadCocktails() de CocktailRepository
-                val cocktailsList = CocktailRepository.loadCocktails()
+                val cocktailsList = CocktailRepository.loadCocktails(cocktailName)
                 // Mise à jour de la donnée observable avec les résultats
                 dataList.value = cocktailsList.map { cocktail ->
                     PictureBean(

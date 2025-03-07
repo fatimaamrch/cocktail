@@ -9,10 +9,10 @@ data class CocktailBean(val id: Int, val title: String, val difficulty: String, 
 object CocktailRepository {
     private val client = OkHttpClient()
     private val gson = Gson()
-    private const val API_URL = "https://the-cocktail-db3.p.rapidapi.com/"  // URL de base
+    private const val API_URL = "https://the-cocktail-db3.p.rapidapi.com"  // URL de base
     private const val API_KEY = "3f58d16fb6msh55e470dc672331ep174154jsn7d4b3926a3c9"  // Votre clé d'API
 
-    fun loadCocktails(): List<CocktailBean> {
+    fun loadCocktails(cocktailName:String): List<CocktailBean> {
         val json: String = sendGet(API_URL)
         // Adaptez ici en récupérant directement la liste au lieu de l'objet englobant
         return gson.fromJson(json, Array<CocktailBean>::class.java).toList()
@@ -37,21 +37,12 @@ object CocktailRepository {
 
 // Fonction principale pour tester la récupération des cocktails
 fun main() {
-    try {
-        val cocktails = CocktailRepository.loadCocktails()
-
-        if (cocktails.isEmpty()) {
-            println("Aucun cocktail trouvé.")
-        } else {
-            cocktails.forEach { cocktail ->
-                println("Cocktail: ${cocktail.title}")
-                println("Difficulté: ${cocktail.difficulty}")
-                println("Image: ${cocktail.image}")
-                println("-----------------------------")
-            }
-        }
-    } catch (e: Exception) {
-        println("Erreur : ${e.message}")
-        e.printStackTrace()
+    val cocktails = CocktailRepository.loadCocktails("sangria")
+    for (cocktail in cocktails) {
+        println("""
+            🎮 Titre: ${cocktail.title}
+            🥵 Difficulté: ${cocktail.difficulty}
+            image: ${cocktail.image}
+        """.trimIndent())
     }
 }

@@ -50,16 +50,15 @@ import com.example.myapplication.viewmodel.MainViewModel
 @Composable
 fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel()) {
 
-
-
     Column(modifier= modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
         var searchText = remember { mutableStateOf("") }
 
         SearchBar(searchText= searchText)
 
-        //Observation
-        val list = mainViewModel.dataList.collectAsStateWithLifecycle().value //.filter { it.title.contains(searchText.value, true) }
+        // Filtrage appliqué sur la liste
+        val list = mainViewModel.dataList.collectAsStateWithLifecycle().value
+            .filter { it.title.contains(searchText.value, ignoreCase = true) }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(5f)) {
             items(list.size) {
@@ -95,6 +94,7 @@ fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = v
         }
     }
 }
+
 
 @Composable
 fun SearchBar(modifier: Modifier = Modifier, searchText: MutableState<String>) {
