@@ -2,35 +2,23 @@ package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.model.CocktailBeanDetails
 import com.example.myapplication.model.CocktailRepository
 import com.example.myapplication.model.PictureBean
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-fun main() {
-    val viewModel = MainViewModel()
-    viewModel.loadCocktails("")
-
-    while (viewModel.runInProgress.value) {
-        println("Attente...")
-        Thread.sleep(500)
-    }
-
-    // Affichage de la liste (qui doit être remplie) contenue dans la donnée observable
-    println("List : ${viewModel.dataList.value}")
-    println("ErrorMessage : ${viewModel.errorMessage.value}")
-}
-
 const val LONG_TEXT = """Le Lorem Ipsum est simplement du faux texte employé dans la composition
     et la mise en page avant impression. Le Lorem Ipsum est le faux texte standard
     de l'imprimerie depuis les années 1500"""
 
 open class MainViewModel : ViewModel() {
-    // MutableStateFlow est une donnée observable
     val dataList = MutableStateFlow(emptyList<PictureBean>())
     val runInProgress = MutableStateFlow(false)
     val errorMessage = MutableStateFlow("")
+    val selectedCocktail = MutableStateFlow<PictureBean?>(null)
+    val selectedCocktailDetails = MutableStateFlow<CocktailBeanDetails?>(null)
 
     init {
         loadCocktails("")
@@ -42,9 +30,7 @@ open class MainViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Appel de la méthode loadCocktails() de CocktailRepository
                 val cocktailsList = CocktailRepository.loadCocktails(cocktailName)
-                // Mise à jour de la donnée observable avec les résultats
                 dataList.value = cocktailsList.map { cocktail ->
                     PictureBean(
                         id = cocktail.id,
@@ -56,22 +42,37 @@ open class MainViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 errorMessage.value = e.message ?: "Une erreur est survenue"
+            } finally {
+                runInProgress.value = false
             }
-
-            runInProgress.value = false
         }
+    }
 
-        println("fin")
+    fun loadCocktailDetails(id: Int) {
+        runInProgress.value = true
+        errorMessage.value = ""
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val cocktail = CocktailRepository.loadCocktailDetails(id)
+                selectedCocktailDetails.value = cocktail
+            } catch (e: Exception) {
+                e.printStackTrace()
+                errorMessage.value = e.message ?: "Une erreur est survenue"
+            } finally {
+                runInProgress.value = false
+            }
+        }
     }
 
     fun loadFakeData(runInProgress: Boolean = false, errorMessage: String = "") {
         this.runInProgress.value = runInProgress
         this.errorMessage.value = errorMessage
         dataList.value = listOf(
-            PictureBean(1, "https://picsum.photos/200", "Cocktail 1", "Easy"),
-            PictureBean(2, "https://picsum.photos/201", "Cocktail 2", "Medium"),
-            PictureBean(3, "https://picsum.photos/202", "Cocktail 3", "Easy"),
-            PictureBean(4, "https://picsum.photos/203", "Cocktail 4", "Hard")
-        ).shuffled() // shuffled() pour avoir un ordre différent à chaque appel
+            PictureBean(1, "https://picsum.photos/200", "Cocktail 1", LONG_TEXT),
+            PictureBean(2, "https://picsum.photos/201", "Cocktail 2", LONG_TEXT),
+            PictureBean(3, "https://picsum.photos/202", "Cocktail 3", LONG_TEXT),
+            PictureBean(4, "https://picsum.photos/203", "Cocktail 4", LONG_TEXT)
+        ).shuffled()
     }
 }

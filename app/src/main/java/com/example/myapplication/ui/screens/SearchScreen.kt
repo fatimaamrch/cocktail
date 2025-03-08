@@ -54,14 +54,12 @@ import com.example.myapplication.viewmodel.MainViewModel
 fun SearchScreen(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = viewModel(),
-    navHostController : NavHostController? = null
+    navHostController: NavHostController? = null
 ) {
-
-    Column(modifier= modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         var searchText = remember { mutableStateOf("") }
 
-        SearchBar(searchText= searchText)
+        SearchBar(searchText = searchText)
 
         // Filtrage appliqué sur la liste
         val list = mainViewModel.dataList.collectAsStateWithLifecycle().value
@@ -69,7 +67,7 @@ fun SearchScreen(
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(5f)) {
             items(list.size) {
-                PictureRowItem(data = list[it], navHostController = navHostController)
+                PictureRowItem(data = list[it], navHostController = navHostController, mainViewModel = mainViewModel)
             }
         }
 
@@ -136,49 +134,43 @@ fun SearchBar(modifier: Modifier = Modifier, searchText: MutableState<String>) {
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
-@Composable //Composable affichant 1 PictureBean
+@Composable
 fun PictureRowItem(
     modifier: Modifier = Modifier,
     data: PictureBean,
-    navHostController : NavHostController?
+    navHostController: NavHostController?,
+    mainViewModel: MainViewModel
 ) {
+    var expanded by remember { mutableStateOf(false) }
 
-    var expended by remember { mutableStateOf(false) }
-
-    Row(modifier = modifier
-        .background(MaterialTheme.colorScheme.tertiaryContainer)
-        .fillMaxWidth()) {
-
-        //Permission Internet nécessaire
+    Row(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .fillMaxWidth()
+            .clickable {
+                mainViewModel.loadCocktailDetails(data.id)
+                navHostController?.navigate(Routes.DetailRoute(data.id))
+            }
+    ) {
         GlideImage(
             model = data.url,
-            //Pour aller le chercher dans string.xml
-            //contentDescription = getString(R.string.picture_of_cat),
-            //En dur
             contentDescription = "une photo de chat",
-            // Image d'attente. Permet également de voir l'emplacement de l'image dans la Preview
             loading = placeholder(R.mipmap.ic_launcher_round),
-            // Image d'échec de chargement
             failure = placeholder(R.mipmap.ic_launcher),
             contentScale = ContentScale.Fit,
-            //même autres champs qu'une Image classique
             modifier = Modifier
-                .heightIn(max = 100.dp) //Sans hauteur il prendra tous l'écran
+                .heightIn(max = 100.dp)
                 .widthIn(max = 100.dp)
-                .clickable {
-                    navHostController?.navigate(Routes.DetailRoute(data.id) )
-
-                }
         )
 
-        Column(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable {
-            expended = !expended
-        }) {
-
+        Column(
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+        ) {
             Text(text = data.title, style = MaterialTheme.typography.titleLarge)
-
             Spacer(modifier = Modifier.height(4.dp))
-
             Text(
                 text = data.longText,
                 style = MaterialTheme.typography.bodyMedium,
