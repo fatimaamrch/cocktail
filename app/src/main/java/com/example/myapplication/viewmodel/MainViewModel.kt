@@ -1,5 +1,6 @@
 package com.example.myapplication.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.model.CocktailBeanDetails
@@ -49,6 +50,7 @@ open class MainViewModel : ViewModel() {
     }
 
     fun loadCocktailDetails(id: Int) {
+        Log.d("MainViewModel", "Chargement des détails pour le cocktail avec ID: $id")
         runInProgress.value = true
         errorMessage.value = ""
 

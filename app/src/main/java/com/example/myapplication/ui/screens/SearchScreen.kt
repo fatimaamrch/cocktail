@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -148,6 +149,7 @@ fun PictureRowItem(
             .background(MaterialTheme.colorScheme.tertiaryContainer)
             .fillMaxWidth()
             .clickable {
+                Log.d("PictureRowItem", "Cliqué sur l'image du cocktail avec ID: ${data.id}")
                 mainViewModel.loadCocktailDetails(data.id)
                 navHostController?.navigate(Routes.DetailRoute(data.id))
             }
