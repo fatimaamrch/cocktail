@@ -151,7 +151,7 @@ fun PictureRowItem(
 
         //Permission Internet nécessaire
         GlideImage(
-            model = data.image,
+            model = data.url,
             //Pour aller le chercher dans string.xml
             //contentDescription = getString(R.string.picture_of_cat),
             //En dur
@@ -180,7 +180,7 @@ fun PictureRowItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = data.difficulty,
+                text = data.longText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )

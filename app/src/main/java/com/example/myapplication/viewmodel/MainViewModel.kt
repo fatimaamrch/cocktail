@@ -48,9 +48,9 @@ open class MainViewModel : ViewModel() {
                 dataList.value = cocktailsList.map { cocktail ->
                     PictureBean(
                         id = cocktail.id,
+                        url = cocktail.image,
                         title = cocktail.title,
-                        difficulty = cocktail.difficulty,
-                        image = cocktail.image
+                        longText = cocktail.difficulty
                     )
                 }
             } catch (e: Exception) {
@@ -68,10 +68,10 @@ open class MainViewModel : ViewModel() {
         this.runInProgress.value = runInProgress
         this.errorMessage.value = errorMessage
         dataList.value = listOf(
-            PictureBean(1, "Cocktail 1", "Facile", "https://picsum.photos/200"),
-            PictureBean(2, "Cocktail 2", "Moyenne", "https://picsum.photos/201"),
-            PictureBean(3, "Cocktail 3", "Difficile", "https://picsum.photos/202"),
-            PictureBean(4, "Cocktail 4", "Facile", "https://picsum.photos/203")
+            PictureBean(1, "https://picsum.photos/200", "Cocktail 1", "Easy"),
+            PictureBean(2, "https://picsum.photos/201", "Cocktail 2", "Medium"),
+            PictureBean(3, "https://picsum.photos/202", "Cocktail 3", "Easy"),
+            PictureBean(4, "https://picsum.photos/203", "Cocktail 4", "Hard")
         ).shuffled() // shuffled() pour avoir un ordre différent à chaque appel
     }
 }
