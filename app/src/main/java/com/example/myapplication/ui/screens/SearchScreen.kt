@@ -171,7 +171,10 @@ fun PictureRowItem(
                 .fillMaxWidth()
                 .clickable { expanded = !expanded }
         ) {
-            Text(text = data.title, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = data.title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.secondaryContainer)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = data.longText,

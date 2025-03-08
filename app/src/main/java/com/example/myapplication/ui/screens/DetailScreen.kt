@@ -31,6 +31,7 @@ import com.example.myapplication.R
 import com.example.myapplication.model.PictureBean
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.viewmodel.LONG_TEXT
+import androidx.compose.ui.text.TextStyle
 
 @Preview(showBackground = true, showSystemUi = true)
 @Preview(showBackground = true, showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
@@ -62,7 +63,10 @@ fun DetailScreen(
             fontSize = 36.sp,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            style = TextStyle(
+                lineHeight = 36.sp // Ajuste cette valeur selon tes besoins
+            )
         )
 
         GlideImage(
