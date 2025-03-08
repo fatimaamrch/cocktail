@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -39,16 +40,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.example.myapplication.R
 import com.example.myapplication.model.PictureBean
+import com.example.myapplication.ui.Routes
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.viewmodel.MainViewModel
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = viewModel()) {
+fun SearchScreen(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel = viewModel(),
+    navHostController : NavHostController? = null
+) {
 
     Column(modifier= modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -62,7 +69,7 @@ fun SearchScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel = v
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(5f)) {
             items(list.size) {
-                PictureRowItem(data = list[it])
+                PictureRowItem(data = list[it], navHostController = navHostController)
             }
         }
 
@@ -130,7 +137,11 @@ fun SearchBar(modifier: Modifier = Modifier, searchText: MutableState<String>) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable //Composable affichant 1 PictureBean
-fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
+fun PictureRowItem(
+    modifier: Modifier = Modifier,
+    data: PictureBean,
+    navHostController : NavHostController?
+) {
 
     var expended by remember { mutableStateOf(false) }
 
@@ -154,16 +165,25 @@ fun PictureRowItem(modifier: Modifier = Modifier, data: PictureBean) {
             modifier = Modifier
                 .heightIn(max = 100.dp) //Sans hauteur il prendra tous l'écran
                 .widthIn(max = 100.dp)
+                .clickable {
+                    navHostController?.navigate(Routes.DetailRoute(data.id) )
+
+                }
         )
-
-
 
         Column(modifier = Modifier.padding(4.dp).fillMaxWidth().clickable {
             expended = !expended
         }) {
 
-
             Text(text = data.title, style = MaterialTheme.typography.titleLarge)
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = data.difficulty,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }
